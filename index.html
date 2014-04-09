@@ -1,0 +1,81 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+<title>SVP Predrive Viewer</title>
+<style type="text/css">
+#events {
+  border: 1px solid black;
+  width: 640px;
+  height: 480px;
+  overflow: auto;
+}
+.event {
+  border: 1px solid black;
+}
+</style>
+<script src="jquery-2.1.0.min.js"></script>
+<script>
+var lines;
+$.ajax("gps/gpsdData").done(function(data) {
+  $('#loading').html('Parsing...');
+  lines = data.split('\n');
+  advance();
+  $('#loading').html('');
+  loadPointData();
+});
+function loadPointData() {
+  $.ajax("gps/poidata").done(function(data) {
+    var events = data.split('\n');
+    for (eventnum in events) {
+      var event = events[eventnum];
+      var eventElement = $('<div>');
+      eventElement.addClass('event');
+      eventElement.html(event);
+      eventElement.appendTo($('#events'));
+    }
+  });
+};
+var currentLine = 0;
+var autoEnabled = 0;
+var speed = 1000;
+function advance() {
+  currentLine += 1;
+  redraw();
+  if (autoEnabled) {
+    setTimeout(advance, speed);
+  }
+}
+function auto() {
+  autoEnabled = 1;
+  advance();
+}
+function turbo() {
+  speed = 100;
+  advance();
+}
+function redraw() {
+  $("#line").html(lines[currentLine]);
+  var data = lines[currentLine].split(',');
+  var time = data[0];
+  var longitude = data[5];
+  var latitude = data[6];
+  $('#time').html(time);
+  $('#longitude').html(longitude);
+  $('#latitude').html(latitude);
+  var filename = time.replace(/:/g,'_') + ',' + longitude + ',' + latitude + '.jpg';
+  $('#image').attr('src','gps/'+filename);
+}  
+</script>
+</head>
+<body>
+<p><img id="image"></img><div id="events"></div></p>
+<span id="loading">Loading...</span>
+<p>Time:<span id="time"></span></p>
+<p>Longitude:<span id="longitude"></span></p>
+<p>Latitude:<span id="latitude"></span></p>
+<br>
+<button onClick="advance()">Next</button>
+<button onClick="auto()">Auto</button>
+<button onClick="turbo()">Turbo</button>
+</body>
+</html>
