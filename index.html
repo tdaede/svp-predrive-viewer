@@ -23,6 +23,9 @@
 .comment {
   float: right;
 }
+.highlight {
+  background-color: red;
+}
 </style>
 <script src="jquery-2.1.0.min.js"></script>
 <script>
@@ -30,7 +33,6 @@ var lines;
 $.ajax("gps/gpsdData").done(function(data) {
   $('#loading').html('Parsing...');
   lines = data.split('\n');
-  advance();
   $('#loading').html('');
   loadPointData();
 });
@@ -42,9 +44,11 @@ function loadPointData() {
       var eventText = events[eventnum].split(',');
       var event = [];
       event.type = eventText[0];
+      event.time = eventText[1];
       event.meta = eventText[5];
-      eventList.push(event);
       var eventElement = $('<div>');
+      event.element = eventElement;
+      eventList.push(event);
       eventElement.addClass('event');
       var eventNameElement = $('<span>');
       eventNameElement.html(event.type);
@@ -63,6 +67,7 @@ function loadPointData() {
       }
       eventElement.appendTo($('#events'));
     }
+    advance();
   });
 };
 var currentLine = 0;
@@ -80,6 +85,7 @@ function auto() {
   advance();
 }
 function turbo() {
+  autoEnabled = 1;
   speed = 100;
   advance();
 }
@@ -92,6 +98,10 @@ function redraw() {
   $('#time').html(time);
   $('#longitude').html(longitude);
   $('#latitude').html(latitude);
+  if (eventList[0].time == time) {
+    eventList[0].element.addClass('highlight');
+    eventList.shift();
+  }
   var filename = time.replace(/:/g,'_') + ',' + longitude + ',' + latitude + '.jpg';
   $('#image').attr('src','gps/'+filename);
 }  
