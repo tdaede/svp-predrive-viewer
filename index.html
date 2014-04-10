@@ -16,6 +16,13 @@
   margin: 2px;
   padding: 5px;
 }
+.speed {
+  float: right;
+  font-size: 40px;
+}
+.comment {
+  float: right;
+}
 </style>
 <script src="jquery-2.1.0.min.js"></script>
 <script>
@@ -35,10 +42,25 @@ function loadPointData() {
       var eventText = events[eventnum].split(',');
       var event = [];
       event.type = eventText[0];
+      event.meta = eventText[5];
       eventList.push(event);
       var eventElement = $('<div>');
       eventElement.addClass('event');
-      eventElement.html(event.type);
+      var eventNameElement = $('<span>');
+      eventNameElement.html(event.type);
+      eventNameElement.appendTo(eventElement);
+      if (event.type == 'SPEED') {
+        var eventSpeedElement = $('<span>');
+	eventSpeedElement.addClass('speed');
+	eventSpeedElement.html(event.meta);
+	eventSpeedElement.appendTo(eventElement);
+      }
+      if (event.type == 'COMMENT') {
+        var eventSpeedElement = $('<span>');
+	eventSpeedElement.addClass('comment');
+	eventSpeedElement.html(event.meta);
+	eventSpeedElement.appendTo(eventElement);
+      }
       eventElement.appendTo($('#events'));
     }
   });
