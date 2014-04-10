@@ -8,6 +8,12 @@
   width: 640px;
   height: 480px;
   overflow: auto;
+  display: inline-block;
+}
+#image {
+  display: inline-block;
+  width: 640px;
+  height: 480px;
 }
 .event {
   border: 2px solid gray;
@@ -95,22 +101,30 @@ function auto() {
   }
 }
 function turbo() {
-  speed = 100;
+  speed = 200;
   if (!autoEnabled) {
     autoEnabled = 1;
     advance();
   }
 }
+function parseGPSEntry(line) {
+  var data = line.split(',');
+  var ret = [];
+  ret.time = data[0];
+  ret.longitude = data[5];
+  ret.latitude = data[6];
+  return ret;
+}
+function getFilename(data) {
+  return data.time.replace(/:/g,'_') + ',' + data.longitude + ',' + data.latitude + '.jpg';
+}
 function redraw() {
   $("#line").html(lines[currentLine]);
-  var data = lines[currentLine].split(',');
-  var time = data[0];
-  var longitude = data[5];
-  var latitude = data[6];
-  $('#time').html(time);
-  $('#longitude').html(longitude);
-  $('#latitude').html(latitude);
-  var date = new Date(time);
+  var data = parseGPSEntry(lines[currentLine]);
+  $('#time').html(data.time);
+  $('#longitude').html(data.longitude);
+  $('#latitude').html(data.latitude);
+  var date = new Date(data.time);
   var nextEventDate = new Date(eventList[0].time);
   if ((nextEventDate.getTime() - date.getTime()) < 60000) {
     eventList[0].element.addClass('soon');
@@ -126,14 +140,17 @@ function redraw() {
     eventList.shift();
     eventList[2].element[0].scrollIntoView(false);
   }
-  var filename = time.replace(/:/g,'_') + ',' + longitude + ',' + latitude + '.jpg';
+  var filename = getFilename(data);
   $('#image').attr('src','gps/'+filename);
+  var nextData = parseGPSEntry(lines[currentLine+1]);
+  var nextFilename = getFilename(nextData);
+  $('<img />').attr('src','gps/'+nextFilename);
 }  
 </script>
 </head>
 <body>
-<p><img id="image"></img><div id="events"></div></p>
-<span id="loading">Loading...</span>
+<img id="image"></img><div id="events"></div>
+<p><span id="loading">Loading...</span></p>
 <p>Time:<span id="time"></span></p>
 <p>Longitude:<span id="longitude"></span></p>
 <p>Latitude:<span id="latitude"></span></p>
