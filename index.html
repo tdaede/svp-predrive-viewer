@@ -88,13 +88,18 @@ function advance() {
   }
 }
 function auto() {
-  autoEnabled = 1;
-  advance();
+  speed = 1000;
+  if (!autoEnabled) {
+    autoEnabled = 1;
+    advance();
+  }
 }
 function turbo() {
-  autoEnabled = 1;
   speed = 100;
-  advance();
+  if (!autoEnabled) {
+    autoEnabled = 1;
+    advance();
+  }
 }
 function redraw() {
   $("#line").html(lines[currentLine]);
