@@ -10,7 +10,7 @@
   overflow: auto;
 }
 .event {
-  border: 1px solid gray;
+  border: 2px solid gray;
   border-radius: 8px;
   height: 50px;
   margin: 2px;
@@ -23,8 +23,15 @@
 .comment {
   float: right;
 }
-.highlight {
-  background-color: red;
+.passed {
+  background-color: lightgray;
+  color: darkgray;
+}
+.soon {
+  border: 2px solid blue;
+}
+.verysoon {
+  border: 2px solid red;
 }
 </style>
 <script src="jquery-2.1.0.min.js"></script>
@@ -100,9 +107,19 @@ function redraw() {
   $('#latitude').html(latitude);
   var date = new Date(time);
   var nextEventDate = new Date(eventList[0].time);
+  if ((nextEventDate.getTime() - date.getTime()) < 60000) {
+    eventList[0].element.addClass('soon');
+  }
+  if ((nextEventDate.getTime() - date.getTime()) < 10000) {
+    eventList[0].element.removeClass('soon');
+    eventList[0].element.addClass('verysoon');
+  }
   if (date.getTime() > nextEventDate.getTime()) {
-    eventList[0].element.addClass('highlight');
+    eventList[0].element.removeClass('soon');
+    eventList[0].element.removeClass('verysoon');
+    eventList[0].element.addClass('passed');
     eventList.shift();
+    eventList[2].element[0].scrollIntoView(false);
   }
   var filename = time.replace(/:/g,'_') + ',' + longitude + ',' + latitude + '.jpg';
   $('#image').attr('src','gps/'+filename);
