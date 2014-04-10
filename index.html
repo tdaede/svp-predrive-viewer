@@ -10,7 +10,11 @@
   overflow: auto;
 }
 .event {
-  border: 1px solid black;
+  border: 1px solid gray;
+  border-radius: 8px;
+  height: 50px;
+  margin: 2px;
+  padding: 5px;
 }
 </style>
 <script src="jquery-2.1.0.min.js"></script>
@@ -23,14 +27,18 @@ $.ajax("gps/gpsdData").done(function(data) {
   $('#loading').html('');
   loadPointData();
 });
+var eventList = []
 function loadPointData() {
   $.ajax("gps/poidata").done(function(data) {
     var events = data.split('\n');
     for (eventnum in events) {
-      var event = events[eventnum];
+      var eventText = events[eventnum].split(',');
+      var event = [];
+      event.type = eventText[0];
+      eventList.push(event);
       var eventElement = $('<div>');
       eventElement.addClass('event');
-      eventElement.html(event);
+      eventElement.html(event.type);
       eventElement.appendTo($('#events'));
     }
   });
