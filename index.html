@@ -43,15 +43,31 @@
 <script src="jquery-2.1.0.min.js"></script>
 <script>
 var lines;
-$.ajax("gps/gpsdData").done(function(data) {
+var points = []
+var totalDistance = 0;
+$.ajax("ASC2014_Strategy_Predrive/gpsday4.3/gpsdData").done(function(data) {
   $('#loading').html('Parsing...');
   lines = data.split('\n');
+  var lastLat = 0;
+  var lastLon = 0;
+  for (linenum in lines) {
+    var point = parseGPSEntry(lines[linenum]);
+    if (lastLon != 0) {
+      var diffLat = parseFloat(point.latitude) - lastLat;
+      var diffLon = parseFloat(point.longitude)- lastLon;
+      if (isNaN(diffLat) || isNaN(diffLon)) continue;
+      totalDistance = totalDistance + Math.sqrt(diffLat*diffLat+diffLon*diffLon);
+    }
+    lastLat = parseFloat(point.latitude);
+    lastLon = parseFloat(point.longitude);
+    points.push(point);
+  }
   $('#loading').html('');
   loadPointData();
 });
 var eventList = []
 function loadPointData() {
-  $.ajax("gps/poidata").done(function(data) {
+  $.ajax("ASC2014_Strategy_Predrive/gpsday4.3/poidata").done(function(data) {
     var events = data.split('\n');
     for (eventnum in events) {
       var eventText = events[eventnum].split(',');
@@ -68,15 +84,15 @@ function loadPointData() {
       eventNameElement.appendTo(eventElement);
       if (event.type == 'SPEED') {
         var eventSpeedElement = $('<span>');
-	eventSpeedElement.addClass('speed');
-	eventSpeedElement.html(event.meta);
-	eventSpeedElement.appendTo(eventElement);
+        eventSpeedElement.addClass('speed');
+        eventSpeedElement.html(event.meta);
+        eventSpeedElement.appendTo(eventElement);
       }
       if (event.type == 'COMMENT') {
         var eventSpeedElement = $('<span>');
-	eventSpeedElement.addClass('comment');
-	eventSpeedElement.html(event.meta);
-	eventSpeedElement.appendTo(eventElement);
+        eventSpeedElement.addClass('comment');
+        eventSpeedElement.html(event.meta);
+        eventSpeedElement.appendTo(eventElement);
       }
       eventElement.appendTo($('#events'));
     }
@@ -101,7 +117,7 @@ function auto() {
   }
 }
 function turbo() {
-  speed = 200;
+  speed = 100;
   if (!autoEnabled) {
     autoEnabled = 1;
     advance();
@@ -111,40 +127,39 @@ function parseGPSEntry(line) {
   var data = line.split(',');
   var ret = [];
   ret.time = data[0];
+  ret.date = new Date(data[0]);
   ret.longitude = data[5];
   ret.latitude = data[6];
   return ret;
 }
 function getFilename(data) {
-  return data.time.replace(/:/g,'_') + ',' + data.longitude + ',' + data.latitude + '.jpg';
+  return data.time + ',' + data.longitude + ',' + data.latitude + '.jpg';
 }
 function redraw() {
-  $("#line").html(lines[currentLine]);
-  var data = parseGPSEntry(lines[currentLine]);
-  $('#time').html(data.time);
-  $('#longitude').html(data.longitude);
-  $('#latitude').html(data.latitude);
-  var date = new Date(data.time);
+  var point = points[currentLine];
+  $('#time').html(point.time);
+  $('#longitude').html(point.longitude);
+  $('#latitude').html(point.latitude);
   var nextEventDate = new Date(eventList[0].time);
-  if ((nextEventDate.getTime() - date.getTime()) < 60000) {
+  if ((nextEventDate.getTime() - point.date.getTime()) < 60000) {
     eventList[0].element.addClass('soon');
   }
-  if ((nextEventDate.getTime() - date.getTime()) < 10000) {
+  if ((nextEventDate.getTime() - point.date.getTime()) < 10000) {
     eventList[0].element.removeClass('soon');
     eventList[0].element.addClass('verysoon');
   }
-  if (date.getTime() > nextEventDate.getTime()) {
+  if (point.date.getTime() > nextEventDate.getTime()) {
     eventList[0].element.removeClass('soon');
     eventList[0].element.removeClass('verysoon');
     eventList[0].element.addClass('passed');
     eventList.shift();
     eventList[2].element[0].scrollIntoView(false);
   }
-  var filename = getFilename(data);
-  $('#image').attr('src','gps/'+filename);
+  var filename = getFilename(point);
+  $('#image').attr('src','ASC2014_Strategy_Predrive/gps/'+filename);
   var nextData = parseGPSEntry(lines[currentLine+1]);
   var nextFilename = getFilename(nextData);
-  $('<img />').attr('src','gps/'+nextFilename);
+  $('<img />').attr('src','ASC2014_Strategy_Predrive/gps/'+nextFilename);
 }  
 </script>
 </head>
