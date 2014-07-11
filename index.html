@@ -2,6 +2,7 @@
 <html>
 <head>
 <title>SVP Predrive Viewer</title>
+<link href="//maxcdn.bootstrapcdn.com/font-awesome/4.1.0/css/font-awesome.min.css" rel="stylesheet">
 <style type="text/css">
 #events {
   border: 1px solid black;
@@ -39,11 +40,31 @@
 .verysoon {
   border: 2px solid red;
 }
+.marker {
+  float: left;
+  position: absolute;
+  top: 5px;
+}
+.stopsign{
+  color: red;
+}
+.position{
+  color: blue;
+  top: 0px;
+  z-index: 1;
+}
+#line {
+  height: 40px;
+  width: 1280px;
+  position: relative;
+  overflow: auto;
+}
 </style>
 <script src="jquery-2.1.0.min.js"></script>
 <script>
 var lines;
 var points = []
+var pointsByTime = []
 var totalDistance = 0;
 $.ajax("ASC2014_Strategy_Predrive/gpsday4.3/gpsdData").done(function(data) {
   $('#loading').html('Parsing...');
@@ -57,10 +78,12 @@ $.ajax("ASC2014_Strategy_Predrive/gpsday4.3/gpsdData").done(function(data) {
       var diffLon = parseFloat(point.longitude)- lastLon;
       if (isNaN(diffLat) || isNaN(diffLon)) continue;
       totalDistance = totalDistance + Math.sqrt(diffLat*diffLat+diffLon*diffLon);
+      point.distance = totalDistance;
     }
     lastLat = parseFloat(point.latitude);
     lastLon = parseFloat(point.longitude);
     points.push(point);
+    pointsByTime[point.time] = point;
   }
   $('#loading').html('');
   loadPointData();
@@ -75,6 +98,9 @@ function loadPointData() {
       event.type = eventText[0];
       event.time = eventText[1];
       event.meta = eventText[5];
+      if (event.time in pointsByTime) {
+        event.point = pointsByTime[event.time];
+      }
       var eventElement = $('<div>');
       event.element = eventElement;
       eventList.push(event);
@@ -95,6 +121,18 @@ function loadPointData() {
         eventSpeedElement.appendTo(eventElement);
       }
       eventElement.appendTo($('#events'));
+      if ('point' in event) {
+        var lineMarker = $('<div></div>');
+        if (event.type == 'STOPSIGN') {
+          lineMarker.addClass('fa fa-circle-o');
+          lineMarker.addClass('stopsign');
+        } else if (event.type == 'COMMENT') {
+          lineMarker.addClass('fa fa-comment');
+        }
+        lineMarker.addClass('marker');
+        lineMarker.css('left',event.point.distance*1000);
+        lineMarker.appendTo($('#line'));
+      }
     }
     advance();
   });
@@ -140,6 +178,7 @@ function redraw() {
   $('#time').html(point.time);
   $('#longitude').html(point.longitude);
   $('#latitude').html(point.latitude);
+  $('#position').css('left',point.distance*1000);
   var nextEventDate = new Date(eventList[0].time);
   if ((nextEventDate.getTime() - point.date.getTime()) < 60000) {
     eventList[0].element.addClass('soon');
@@ -164,6 +203,9 @@ function redraw() {
 </script>
 </head>
 <body>
+<div id="line">
+<div id="position" class="marker position fa fa-map-marker"></div>
+</div>
 <img id="image"></img><div id="events"></div>
 <p><span id="loading">Loading...</span></p>
 <p>Time:<span id="time"></span></p>
