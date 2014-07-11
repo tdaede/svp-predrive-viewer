@@ -140,6 +140,12 @@ function loadPointData() {
 var currentLine = 0;
 var autoEnabled = 0;
 var speed = 1000;
+function jump(e) {
+  currentLine = parseInt($(e.target).val());
+  redraw();
+}
+function stop() {
+}
 function advance() {
   currentLine += 1;
   redraw();
@@ -197,6 +203,7 @@ function redraw() {
   var filename = getFilename(point);
   $('#image').attr('src','ASC2014_Strategy_Predrive/gps/'+filename);
   var nextData = parseGPSEntry(lines[currentLine+1]);
+  $('#step').val(currentLine);
   var nextFilename = getFilename(nextData);
   $('<img />').attr('src','ASC2014_Strategy_Predrive/gps/'+nextFilename);
 }  
@@ -211,6 +218,7 @@ function redraw() {
 <p>Time:<span id="time"></span></p>
 <p>Longitude:<span id="longitude"></span></p>
 <p>Latitude:<span id="latitude"></span></p>
+<p>Step number:<input id="step" onChange="jump(event)"></span></p>
 <br>
 <button onClick="advance()">Next</button>
 <button onClick="auto()">Auto</button>
