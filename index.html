@@ -59,6 +59,12 @@
   position: relative;
   overflow: auto;
 }
+#filmroll {
+  height: 100px;
+}
+.slide {
+  width: 100px;
+}
 </style>
 <script src="jquery-2.1.0.min.js"></script>
 <script>
@@ -248,6 +254,13 @@ function redraw() {
   }
   $('#image').attr('src',getImagePath(point));
   $('#step').val(currentLine);
+  $('.slide').remove();
+  for (var i = 1; i < 11; i++) {
+    var slide = $('<img></img>');
+    slide.attr('src',getImagePath(points[currentLine+i*5]));
+    slide.addClass('slide');
+    slide.appendTo($('#filmroll'));
+  }
   //$('<img></img>').attr('src',getImagePath(points[currentLine+1]);
 }  
 </script>
@@ -255,6 +268,8 @@ function redraw() {
 <body>
 <div id="line" onClick="seek(event)">
 <div id="position" class="marker position fa fa-map-marker"></div>
+</div>
+<div id="filmroll">
 </div>
 <img id="image"></img><div id="events"></div>
 <p><span id="loading">Loading...</span></p>
