@@ -77,6 +77,8 @@ $.ajax("ASC2014_Strategy_Predrive/gpsday4.3/gpsdData").done(function(data) {
       var diffLat = parseFloat(point.latitude) - lastLat;
       var diffLon = parseFloat(point.longitude)- lastLon;
       if (isNaN(diffLat) || isNaN(diffLon)) continue;
+      diffLat = diffLat * 363688.33;
+      diffLon = diffLon * 316555.30;
       totalDistance = totalDistance + Math.sqrt(diffLat*diffLat+diffLon*diffLon);
       point.distance = totalDistance;
     }
@@ -121,6 +123,7 @@ function loadPointData() {
         eventSpeedElement.appendTo(eventElement);
       }
       eventElement.appendTo($('#events'));
+      /*
       if ('point' in event) {
         var lineMarker = $('<div></div>');
         if (event.type == 'STOPSIGN') {
@@ -133,6 +136,7 @@ function loadPointData() {
         lineMarker.css('left',event.point.distance*1000);
         lineMarker.appendTo($('#line'));
       }
+      */
     }
     advance();
   });
@@ -145,6 +149,7 @@ function jump(e) {
   redraw();
 }
 function stop() {
+  autoEnabled = 0;
 }
 function advance() {
   currentLine += 1;
@@ -167,6 +172,33 @@ function turbo() {
     advance();
   }
 }
+function getImagePath(point) {
+  var filename = getFilename(point);
+  var imagepath = 'gps/'
+  if (point.date > new Date('2014-03-20T19:55:00.000Z')) {
+    imagepath = 'gpsday4.3/';
+  }
+  else if (point.date > new Date('2014-03-20T16:41:00.000Z')) {
+    imagepath = 'gpsday4.2/';
+  }
+  else if (point.date > new Date('2014-03-20T14:06:00.000Z')) {
+    imagepath = 'gpsday4.1/';
+  }
+  else if (point.date > new Date('2014-03-19T13:46:00.000Z')) {
+    imagepath = 'gpsday3.1/';
+  }
+  else if (point.date > new Date('2014-03-18T19:39:00.000Z')) {
+    imagepath = 'gpsday2.5/';
+  }
+  else if (point.date > new Date('2014-03-18T14:22:00.000Z')) {
+    imagepath = 'gpsday2/';
+    filename = filename.replace(/:/g,'_');
+  }
+  else if (point.date > new Date('2014-03-17T14:28:00.000Z')) {
+    imagepath = 'gpsday1/';
+  }
+  return 'ASC2014_Strategy_Predrive/'+imagepath+filename;
+}
 function parseGPSEntry(line) {
   var data = line.split(',');
   var ret = [];
@@ -179,12 +211,26 @@ function parseGPSEntry(line) {
 function getFilename(data) {
   return data.time + ',' + data.longitude + ',' + data.latitude + '.jpg';
 }
+function seek(e) {
+  var targetDistance = e.layerX/1280*totalDistance;
+  var bestPointNum = null;
+  var bestError = 100000000;
+  for (pointnum in points) {
+    var error = Math.abs(points[pointnum].distance-targetDistance);
+    if (error < bestError) {
+      bestError = error;
+      bestPointNum = pointnum;
+    }
+  }
+  currentLine = Number(bestPointNum);
+  redraw();
+}
 function redraw() {
   var point = points[currentLine];
   $('#time').html(point.time);
   $('#longitude').html(point.longitude);
   $('#latitude').html(point.latitude);
-  $('#position').css('left',point.distance*1000);
+  $('#position').css('left',point.distance/totalDistance*1280);
   var nextEventDate = new Date(eventList[0].time);
   if ((nextEventDate.getTime() - point.date.getTime()) < 60000) {
     eventList[0].element.addClass('soon');
@@ -200,17 +246,14 @@ function redraw() {
     eventList.shift();
     eventList[2].element[0].scrollIntoView(false);
   }
-  var filename = getFilename(point);
-  $('#image').attr('src','ASC2014_Strategy_Predrive/gps/'+filename);
-  var nextData = parseGPSEntry(lines[currentLine+1]);
+  $('#image').attr('src',getImagePath(point));
   $('#step').val(currentLine);
-  var nextFilename = getFilename(nextData);
-  $('<img />').attr('src','ASC2014_Strategy_Predrive/gps/'+nextFilename);
+  //$('<img></img>').attr('src',getImagePath(points[currentLine+1]);
 }  
 </script>
 </head>
 <body>
-<div id="line">
+<div id="line" onClick="seek(event)">
 <div id="position" class="marker position fa fa-map-marker"></div>
 </div>
 <img id="image"></img><div id="events"></div>
@@ -218,10 +261,11 @@ function redraw() {
 <p>Time:<span id="time"></span></p>
 <p>Longitude:<span id="longitude"></span></p>
 <p>Latitude:<span id="latitude"></span></p>
-<p>Step number:<input id="step" onChange="jump(event)"></span></p>
+<p>Step number:<input id="step"></span></p>
 <br>
 <button onClick="advance()">Next</button>
 <button onClick="auto()">Auto</button>
 <button onClick="turbo()">Turbo</button>
+<button onClick="stop()">Stop</button>
 </body>
 </html>
