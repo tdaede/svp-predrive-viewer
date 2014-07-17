@@ -30,6 +30,11 @@ def hello():
     data['latitude'] = gpsd.fix.latitude
     data['longitude'] = gpsd.fix.longitude
     return json.dumps(data)
+    
+@app.after_request
+def after_request(response):
+    response.headers.add('Access-Control-Allow-Origin', '*')
+    return response
 
 if __name__ == "__main__":
     gpsp = GpsPoller() # create the thread

@@ -212,6 +212,8 @@ function parseGPSEntry(line) {
   ret.date = new Date(data[0]);
   ret.longitude = data[5];
   ret.latitude = data[6];
+  ret.long_float = parseFloat(data[5]);
+  ret.lat_float = parseFloat(data[6]);
   return ret;
 }
 function getFilename(data) {
@@ -231,6 +233,27 @@ function seek(e) {
   currentLine = Number(bestPointNum);
   redraw();
 }
+function gpsStart(){
+  $('#mode').html('GPS');
+  $.getJSON("http://localhost:5000/",function(data) {
+    console.log(data.latitude);
+    console.log(data.longitude);
+    var bestPointNum = null;
+    var bestError = 100000000;
+    for (pointnum in points) {
+      var error = Math.sqrt(
+        Math.pow(points[pointnum].lat_float-data.latitude,2) + 
+        Math.pow(points[pointnum].long_float-data.longitude,2));
+      if (error < bestError) {
+        bestError = error;
+        bestPointNum = pointnum;
+      }
+    }
+    currentLine = Number(bestPointNum);
+    redraw();
+    setTimeout(gpsStart,1000);
+  });
+};
 function redraw() {
   var point = points[currentLine];
   $('#time').html(point.time);
@@ -277,10 +300,12 @@ function redraw() {
 <p>Longitude:<span id="longitude"></span></p>
 <p>Latitude:<span id="latitude"></span></p>
 <p>Step number:<input id="step"></span></p>
+<p>Mode:<span id="mode"></span></p>
 <br>
 <button onClick="advance()">Next</button>
 <button onClick="auto()">Auto</button>
 <button onClick="turbo()">Turbo</button>
 <button onClick="stop()">Stop</button>
+<button onClick="gpsStart()">GPS Mode</button>
 </body>
 </html>
