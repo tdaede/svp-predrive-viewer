@@ -327,6 +327,8 @@ function redraw() {
   signs.selectAll('.roadsign_distance')
     .text(function(d) { return d.distanceAway.toFixed(0) + ' ft'; });
   signs.exit()
+    .filter(':not(.dead)')
+    .classed('dead',true)
     .transition()
     .style('width','0px')
     .remove();
