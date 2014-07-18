@@ -172,7 +172,7 @@ var currentLine = 0;
 var autoEnabled = 0;
 var speed = 1000;
 function jump(e) {
-  currentLine = parseInt($(e.target).val());
+  currentLine = parseInt($('#step').val());
   redraw();
 }
 function stop() {
@@ -355,11 +355,12 @@ function redraw() {
 </div>
 <img id="image"></img><div id="events"></div>
 <p><span id="loading">Loading...</span></p>
-<p>Time:<span id="time"></span></p>
-<p>Longitude:<span id="longitude"></span></p>
-<p>Latitude:<span id="latitude"></span></p>
-<p>Step number:<input id="step"></span></p>
-<p>Mode:<span id="mode"></span></p>
+<p>Time: <span id="time"></span></p>
+<p>Longitude: <span id="longitude"></span></p>
+<p>Latitude: <span id="latitude"></span></p>
+<p>Step number: <input id="step"></span>
+<button onClick="jump()">Go</button></p>
+<p>Mode: <span id="mode">Stopped</span></p>
 <br>
 <button onClick="advance()">Next</button>
 <button onClick="auto()">Auto</button>
