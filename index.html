@@ -85,6 +85,10 @@
 .roadsign_distance {
   font-size: 20px;
 }
+.roadsign_close {
+  font-size: 30px;
+  color: red;
+}
 </style>
 <script src="jquery-2.1.0.min.js"></script>
 <script src="d3.min.js"></script>
@@ -325,7 +329,8 @@ function redraw() {
     .append('div')
       .attr('class','roadsign_distance')
   signs.selectAll('.roadsign_distance')
-    .text(function(d) { return d.distanceAway.toFixed(0) + ' ft'; });
+    .text(function(d) { return d.distanceAway.toFixed(0) + ' ft'; })
+    .classed('roadsign_close',function (d) { return d.distanceAway < 500; });
   signs.exit()
     .filter(':not(.dead)')
     .classed('dead',true)
