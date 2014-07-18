@@ -54,16 +54,19 @@
   z-index: 1;
 }
 #line {
-  height: 40px;
+  height: 16px;
   width: 1280px;
   position: relative;
-  overflow: auto;
+  overflow: none;
+  border-bottom: 2px solid blue;
+  margin-bottom: 10px;
 }
 #filmroll {
   height: 100px;
 }
 .slide {
   width: 100px;
+  height: 75px;
 }
 </style>
 <script src="jquery-2.1.0.min.js"></script>
@@ -155,6 +158,7 @@ function jump(e) {
   redraw();
 }
 function stop() {
+  $('#mode').html('Stopped');
   autoEnabled = 0;
 }
 function advance() {
@@ -166,6 +170,7 @@ function advance() {
 }
 function auto() {
   speed = 1000;
+  $('#mode').html('Auto');
   if (!autoEnabled) {
     autoEnabled = 1;
     advance();
@@ -173,6 +178,7 @@ function auto() {
 }
 function turbo() {
   speed = 100;
+  $('#mode').html('Turbo');
   if (!autoEnabled) {
     autoEnabled = 1;
     advance();
