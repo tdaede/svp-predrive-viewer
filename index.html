@@ -80,7 +80,8 @@
   overflow: hidden;
 }
 .roadsign img {
-  width: 70%;
+  max-width: 70%;
+  height: 70%;
 }
 .roadsign_distance {
   font-size: 20px;
@@ -88,6 +89,10 @@
 .roadsign_close {
   font-size: 30px;
   color: red;
+}
+.roadsign_speed {
+  height: 70%;
+  font-size: 50px;
 }
 </style>
 <script src="jquery-2.1.0.min.js"></script>
@@ -313,7 +318,7 @@ function redraw() {
   for (i in eventList) {
     var event = eventList[i];
     if ('point' in event) {
-      if ((event.type != 'COMMENT') && (event.type != 'SPEED')) {
+      if ((event.type != 'COMMENT')) {
         if (event.point.distance > point.distance) {
           event.distanceAway = event.point.distance - point.distance;
           nextRoadEvents.push(event);
@@ -328,8 +333,16 @@ function redraw() {
   var signsEnter = signs.enter().append("div");
   signsEnter
     .attr('class','roadsign')
-    .append('img').each(function(event) {
-      d3.select(this).attr('src','svg/'+event.type+'.svg'); });
+    .each(function(event) {
+      if (event.type == 'SPEED') {
+        d3.select(this).append('div')
+          .classed('roadsign_speed',true)
+          .text(event.meta);
+      } else {
+        d3.select(this).append('img')
+          .attr('src','svg/'+event.type+'.svg');
+      }
+      });
   signsEnter
     .append('div')
       .attr('class','roadsign_distance')
