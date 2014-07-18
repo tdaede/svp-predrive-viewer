@@ -328,8 +328,8 @@ function redraw() {
   var signsEnter = signs.enter().append("div");
   signsEnter
     .attr('class','roadsign')
-    .append('img')
-      .attr('src',function(event) { return 'svg/'+event.type+'.svg'; });
+    .append('img').each(function(event) {
+      d3.select(this).attr('src','svg/'+event.type+'.svg'); });
   signsEnter
     .append('div')
       .attr('class','roadsign_distance')
