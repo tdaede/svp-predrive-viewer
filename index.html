@@ -281,6 +281,17 @@ function redraw() {
     eventList.shift();
     eventList[2].element[0].scrollIntoView(false);
   }
+  // find next 3 interesting events
+  nextRoadEvents = [];
+  for (var i = 0; i < 10; i++) {
+    var event = eventList[i];
+    if ('point' in event) {
+      if (event.point.distance > point.distance) {
+        nextRoadEvents.push(event);
+      }
+    }
+  }
+  console.log(nextRoadEvents);
   $('#image').attr('src',getImagePath(point));
   $('#step').val(currentLine);
   $('.slide').remove();
